@@ -1,2 +1,1 @@
 # analise-sashibo
-analise-sashibo
