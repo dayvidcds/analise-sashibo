@@ -43,7 +43,9 @@ plt.ylim(0, 255) #range do eixo y
 plt.grid() #função que desenha a grade no gráfico
 
 #plotando no gráfico as posições de cada centroide
-plt.scatter(kmeans.cluster_centers_[:,1],kmeans.cluster_centers_[:,0], s = 255, c = 'red')
+plt.scatter(kmeans.cluster_centers_[:,1],kmeans.cluster_centers_[:,0], s = 200, c = 'red')
+
+plt.gcf().canvas.set_window_title('K-Means')
 
 #mostrar gráfico
 plt.show()
