@@ -5,6 +5,7 @@ import os
 import argparse
 import convert
 import math
+import csv
 from matplotlib import pyplot as plt
 
 #função responsável por extrair as informações do sashibo
@@ -98,9 +99,9 @@ def test(location):
     #capturando dados HSV da imagem separados
     hue = crop[:, :, 0].mean()
     saturation = crop[:, :, 1].mean()
-    value = crop[:, :, 2].mean()
+    valueHsv = crop[:, :, 2].mean()
 
-    values = [saturation, hue, value]
+    values = [saturation, hue, valueHsv]
 
     plot = plt.bar(x, values)
 
@@ -120,14 +121,14 @@ def test(location):
     #cv2.imshow('HSI Image', hsi)
 
     #capturando dados HSI da imagem separados
-    hue = hsi[:, :, 0].mean()
-    saturation = hsi[:, :, 1].mean()
+    hueHsi = hsi[:, :, 0].mean()
+    saturationHsi = hsi[:, :, 1].mean()
     intensity = hsi[:, :, 2].mean()
 
-    if math.isnan(float(hue)):
-        hue = 0
+    if math.isnan(float(hueHsi)):
+        hueHsi = 0
 
-    values1 = [float(saturation), float(hue), float(intensity)]
+    values1 = [float(saturationHsi), float(hueHsi), float(intensity)]
 
     print(values1)
 
@@ -154,9 +155,9 @@ def test(location):
 
     plt.gcf().canvas.set_window_title(location)
 
-    plt.show(block=False)
+    #plt.show(block=False)
 
-    return 0
+    return saturation, hue, valueHsv, saturationHsi, hueHsi, intensity
 
 def listDir(arg):
     files = []
@@ -178,8 +179,16 @@ def main(argv):
 
     print(files)
 
-    for n in files:
-        test(n)
+    with open('DATASET.csv', mode='w', newline='') as csv_file:
+    
+        fieldnames = ["saturationHsv", "hueHsv", "valueHsv", "saturationHsi", "hueHsi", "intensityHsi"]
+        writer = csv.DictWriter(csv_file, fieldnames=fieldnames, delimiter=';')
+        writer.writeheader()
+        
+        for n in files:
+            saturation, hue, valueHsv, saturationHsi, hueHsi, intensity = test(n)
+            writer.writerow({"saturationHsv": float(saturation), "hueHsv": float(hue), "valueHsv": float(valueHsv), "saturationHsi": float(saturationHsi), "hueHsi": float(hueHsi), "intensityHsi": float(intensity)})
+        csv_file.close()
 
     print('<<< Processado >>>')
 
