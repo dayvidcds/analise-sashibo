@@ -4,6 +4,29 @@ import sys
 import argparse
 from matplotlib import pyplot as plt
 
+def lab(location):
+
+    #abrindo imagem
+    src = cv2.imread(location)
+    #redimensionando a imagem para 600x400
+    src = cv2.resize(src, (600, 400))
+
+    lab = cv2.cvtColor(src, cv2.COLOR_RGB2LAB)
+
+    cv2.imshow('RGB', src)
+
+    cv2.imshow('LAB', lab)
+
+    L = lab[:, :, 0].mean()
+    A = lab[:, :, 1].mean()
+    B = lab[:, :, 2].mean()
+
+    values = [L, A, B]
+
+    print(values)
+
+    return 0
+
 #função responsável por extrair as informações do sashibo
 def test(location):
 
@@ -136,7 +159,7 @@ def main():
 
     #loop que roda a função test para cada arquivo de imagem
     for n in value:
-        test(n)
+        lab(n)
 
     print('<<< Processado >>>')
 

@@ -6,7 +6,7 @@ import numpy as np #para manipular os vetores
 import pandas as pd #para abrir arquivos
 from sklearn.preprocessing import MinMaxScaler #para normalizar
 
-arq = pd.read_csv('../KMEANS/dataset2.csv', sep=';')  
+arq = pd.read_csv('../DATASETS/dataset2.csv', sep=';')   
 dataset = np.array(arq)
 
 normalized = MinMaxScaler(feature_range = (50, 200)) #valor para normalizacao

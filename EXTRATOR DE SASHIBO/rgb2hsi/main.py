@@ -16,6 +16,10 @@ cv2.imshow('H Channel', hsi[:, :, 0])
 cv2.imshow('S Channel', hsi[:, :, 1])
 cv2.imshow('I Channel', hsi[:, :, 2])
 
+values = [hsi[:, :, 0].mean(), hsi[:, :, 1].mean(), hsi[:, :, 2].mean()]
+
+print(values)
+
 cv2.imshow('HSV', hsv)
 
 # Wait for a key press and then terminate the program

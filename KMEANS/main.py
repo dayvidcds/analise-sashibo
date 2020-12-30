@@ -5,7 +5,7 @@ from sklearn.cluster import KMeans #para usar o KMeans
 from sklearn.preprocessing import MinMaxScaler #para normalizar
 
 #carregando arquivo
-arq = pd.read_csv('dataset2.csv', sep=';')  
+arq = pd.read_csv('../DATASETS/dataset2.csv', sep=';')  
 
 #criando array do arquivo csv
 dataset = np.array(arq)
@@ -35,7 +35,7 @@ pred_y = kmeans.predict(x_norm)
 print(kmeans.predict(imgjpg))
 
 #imprime a predicao para o csv importado
-#print(pred_y)
+print(pred_y)
 
 plt.scatter(x_norm[:,2], x_norm[:,1], x_norm[:,0], c = pred_y) #posicionamento dos eixos x e y
 plt.xlim(0, 255) #range do eixo x
@@ -43,7 +43,7 @@ plt.ylim(0, 255) #range do eixo y
 plt.grid() #função que desenha a grade no gráfico
 
 #plotando no gráfico as posições de cada centroide
-plt.scatter(kmeans.cluster_centers_[:,1],kmeans.cluster_centers_[:,0], s = 200, c = 'red')
+plt.scatter(kmeans.cluster_centers_[:,1],kmeans.cluster_centers_[:,0], s = 100, c = 'red')
 
 plt.gcf().canvas.set_window_title('K-Means')
 
