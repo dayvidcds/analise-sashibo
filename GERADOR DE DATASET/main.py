@@ -16,6 +16,14 @@ def test(location):
     #redimensionando a imagem para 600x400
     src = cv2.resize(src, (600, 400))
 
+    lab = cv2.cvtColor(src, cv2.COLOR_RGB2LAB)
+
+    lLab = lab[:, :, 0].mean()
+    aLab = lab[:, :, 1].mean()
+    bLab = lab[:, :, 2].mean()
+
+    #valuesLab = [L, A, B]
+
     #alterando espaço de cores para HSV e jogando a nova imagem na variável hsv
     hsv = cv2.cvtColor(src, cv2.COLOR_BGR2HSV)
 
@@ -114,7 +122,6 @@ def test(location):
     plt.xlabel("hsv separado")
     plt.ylabel("Valor") 
 
-
     #convertendo RGB para HSI
     hsi = convert.RGB_TO_HSI(crop)
 
@@ -155,9 +162,12 @@ def test(location):
 
     plt.gcf().canvas.set_window_title(location)
 
-    #plt.show(block=False)
+    #exibindo graficos
+    plt.show(block=False)
 
-    return saturation, hue, valueHsv, saturationHsi, hueHsi, intensity
+    imgName = location.split('/')
+
+    return imgName[len(imgName) - 1], saturation, hue, valueHsv, saturationHsi, hueHsi, intensity, lLab, aLab, bLab
 
 def listDir(arg):
     files = []
@@ -181,13 +191,15 @@ def main(argv):
 
     with open('DATASET.csv', mode='w', newline='') as csv_file:
     
-        fieldnames = ["saturationHsv", "hueHsv", "valueHsv", "saturationHsi", "hueHsi", "intensityHsi"]
+        fieldnames = ["imgName", "saturationHsv", "hueHsv", "valueHsv", "saturationHsi", "hueHsi", "intensityHsi", "lLab", "aLab", "bLab"]
         writer = csv.DictWriter(csv_file, fieldnames=fieldnames, delimiter=';')
         writer.writeheader()
         
         for n in files:
-            saturation, hue, valueHsv, saturationHsi, hueHsi, intensity = test(n)
-            writer.writerow({"saturationHsv": float(saturation), "hueHsv": float(hue), "valueHsv": float(valueHsv), "saturationHsi": float(saturationHsi), "hueHsi": float(hueHsi), "intensityHsi": float(intensity)})
+            imgName, saturation, hue, valueHsv, saturationHsi, hueHsi, intensity, lLab, aLab, bLab = test(n)
+            writer.writerow({"imgName": imgName, "saturationHsv": float(saturation), "hueHsv": float(hue), 
+            "valueHsv": float(valueHsv), "saturationHsi": float(saturationHsi), "hueHsi": float(hueHsi), "intensityHsi": float(intensity),
+            "lLab": lLab, "aLab": aLab, "bLab": bLab})
         csv_file.close()
 
     print('<<< Processado >>>')
