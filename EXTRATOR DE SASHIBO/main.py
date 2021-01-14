@@ -13,9 +13,9 @@ def lab(location):
 
     lab = cv2.cvtColor(src, cv2.COLOR_RGB2LAB)
 
-    cv2.imshow('RGB', src)
+    #cv2.imshow('RGB', src)
 
-    cv2.imshow('LAB', lab)
+    #cv2.imshow('LAB', lab)
 
     L = lab[:, :, 0].mean()
     A = lab[:, :, 1].mean()
@@ -37,6 +37,8 @@ def test(location):
     #alterando espaço de cores para HSV e jogando a nova imagem na variável hsv
     hsv = cv2.cvtColor(src, cv2.COLOR_BGR2HSV)
 
+    #cv2.imshow('RGB', src)
+
     #detectando a cor do sashibo por range de cor HSV (vermelho mais escuro até o vermelho mais claro)
     #Obs: Foram realizados vários testes com ranges diferentes de vermelho para se chegar nesses valores abaixo
 
@@ -54,15 +56,21 @@ def test(location):
     #foi passado um filtro gausiano para suavizar as bordas da área do sashibo para minimizar as perdas
     gray = cv2.GaussianBlur(mask, (7, 7), 3)
 
+    #cv2.imshow('Gray / GaussianBlur', gray)
+
     #aqui convertemos a imagem para bits, onde de o valor do pixel for menos que o limite
     # ele se torna 0 e se for maior se torna 1. Isso ajuda no algoritmo de contornos.
     t, dst = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_TRIANGLE)
+
+    #cv2.imshow('Binary Image', dst)
 
     #contornando a área do sashibo
     contours, a = cv2.findContours(dst, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
     #pintando contornos na imagem para visualização
     #cv2.drawContours(src, contours, -1, (0, 0, 255), 1, cv2.LINE_AA)
+
+    #cv2.imshow('Contours', src)
 
     #variáveis responsáveis por armazenar os valores da posição do sashibo na imagem original
     x = 0
@@ -98,7 +106,7 @@ def test(location):
 
     plt.subplot(grid[0, 0])
     plt.title('Sashibo')
-    plt.imshow(crop)
+    plt.imshow(crop[:,:,::-1])
 
     plt.subplot(grid[0, 1:])
     plt.title('Histograma referente')
@@ -134,7 +142,7 @@ def test(location):
 
     #cv2.imshow('contornos', src)
 
-    #cv2.imshow('crop', crop)
+    #cv2.imshow('ROI', crop)
 
     #print(hue)
     #print(saturation)
@@ -159,7 +167,7 @@ def main():
 
     #loop que roda a função test para cada arquivo de imagem
     for n in value:
-        lab(n)
+        test(n)
 
     print('<<< Processado >>>')
 

@@ -88,7 +88,7 @@ def test(location):
 
     plt.subplot(grid[0, 0])
     plt.title('Sashibo')
-    plt.imshow(crop)
+    plt.imshow(crop[:,:,::-1])
 
     plt.subplot(grid[0, 1:])
     plt.title('Histograma referente')
