@@ -31,9 +31,9 @@ def test(location):
     #Obs: Foram realizados vários testes com ranges diferentes de vermelho para se chegar nesses valores abaixo
 
     #definindo os valores HSV mínimo para detecção de cor
-    lower_range = np.array([150, 40, 40])
+    lower_range = np.array([160, 0, 0])
     #definindo os valores HSV máximos para detecção de cor
-    upper_range = np.array([189, 255, 255])
+    upper_range = np.array([180, 255, 255])
 
     #criando uma máscara na ára onde não for encontrada a cor que estiver no range definido acima
     mask = cv2.inRange(hsv, lower_range, upper_range)
@@ -63,12 +63,18 @@ def test(location):
     #Percorrendo todo contorno para extrair as informações da posição do sashibo
     for c in contours:
         area = cv2.contourArea(c)
-        if area > 10 and area < 1000000:
+        if area > 1000 and area < 1000000:
             #criando um retângulo na área encontrada e passando as informações de ponto e área para as variáveis
             (x, y, w, h) = cv2.boundingRect(c)
             #cv2.rectangle(src, (x, y), (x + w, y + h), (0, 255, 0), 2, cv2.LINE_AA)
             #print(x,y,w,h)
             break
+        else:
+            """spl = location.split('/')
+            spl = spl[len(spl) - 1]
+            print('<<< ERRO AO PROCESSAR IMAGEM >>> ' + spl)
+            print('')"""
+            return -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 
     #extraindo sashibo
     crop = src[y:y+h, x:x+w]
@@ -137,7 +143,7 @@ def test(location):
 
     values1 = [float(saturationHsi), float(hueHsi), float(intensity)]
 
-    print(values1)
+    #print(values1)
 
     plt.subplot(grid[1, 2])
     plt.title('HSI')
@@ -167,7 +173,7 @@ def test(location):
 
     imgName = location.split('/')
 
-    return imgName[len(imgName) - 1], saturation, hue, valueHsv, saturationHsi, hueHsi, intensity, lLab, aLab, bLab
+    return 0, imgName[len(imgName) - 1], saturation, hue, valueHsv, saturationHsi, hueHsi, intensity, lLab, aLab, bLab
 
 def listDir(arg):
     files = []
@@ -183,11 +189,11 @@ def main(argv):
 
     print('Processando imagens...')
 
-    print(argv[1])
+    #print(argv[1])
 
     files = listDir(argv[1])
 
-    print(files)
+    #print(files)
 
     with open('DATASET.csv', mode='w', newline='') as csv_file:
     
@@ -196,10 +202,13 @@ def main(argv):
         writer.writeheader()
         
         for n in files:
-            imgName, saturation, hue, valueHsv, saturationHsi, hueHsi, intensity, lLab, aLab, bLab = test(n)
-            writer.writerow({"imgName": imgName, "saturationHsv": float(saturation), "hueHsv": float(hue), 
-            "valueHsv": float(valueHsv), "saturationHsi": float(saturationHsi), "hueHsi": float(hueHsi), "intensityHsi": float(intensity),
-            "lLab": lLab, "aLab": aLab, "bLab": bLab})
+            cod, imgName, saturation, hue, valueHsv, saturationHsi, hueHsi, intensity, lLab, aLab, bLab = test(n)
+            if cod < 0:
+                continue
+            else:
+                writer.writerow({"imgName": imgName, "saturationHsv": float(saturation), "hueHsv": float(hue), 
+                "valueHsv": float(valueHsv), "saturationHsi": float(saturationHsi), "hueHsi": float(hueHsi), "intensityHsi": float(intensity),
+                "lLab": lLab, "aLab": aLab, "bLab": bLab})
         csv_file.close()
 
     print('<<< Processado >>>')
