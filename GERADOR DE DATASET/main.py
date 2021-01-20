@@ -74,12 +74,14 @@ def test(location):
             spl = spl[len(spl) - 1]
             print('<<< ERRO AO PROCESSAR IMAGEM >>> ' + spl)
             print('')"""
-            return -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+            return -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 
     #extraindo sashibo
     crop = src[y:y+h, x:x+w]
 
     #abaixo só trabalhamos com a imagem que foi extraída (que é o sahsibo):
+
+    hsv_crop = cv2.cvtColor(crop, cv2.COLOR_BGR2HSV)
 
     #padrão usado pelo opencv, vamos usar nas plotagens dos gráficos abaixo
     color = ('b','g','r')
@@ -111,9 +113,19 @@ def test(location):
     x = np.arange(3)
 
     #capturando dados HSV da imagem separados
-    hue = crop[:, :, 0].mean()
-    saturation = crop[:, :, 1].mean()
-    valueHsv = crop[:, :, 2].mean()
+    hue = hsv_crop[:, :, 0].mean()
+    saturation = hsv_crop[:, :, 1].mean()
+    valueHsv = hsv_crop[:, :, 2].mean()
+
+    #RGB
+
+    r = crop[:, :, 0].mean()
+    g = crop[:, :, 1].mean()
+    b = crop[:, :, 2].mean()
+
+    values_RGB = [r, g, b]
+
+    print(values_RGB)
 
     values = [saturation, hue, valueHsv]
 
@@ -130,6 +142,16 @@ def test(location):
 
     #convertendo RGB para HSI
     hsi = convert.RGB_TO_HSI(crop)
+
+    """r = crop[:, :, 0].mean()
+    b = crop[:, :, 1].mean()
+    b = crop[:, :, 2].mean()
+
+    print('RGB')
+    print()
+    print(r)
+    print(g)
+    print(b)"""
 
     #cv2.imshow('HSI Image', hsi)
 
@@ -173,7 +195,9 @@ def test(location):
 
     imgName = location.split('/')
 
-    return 0, imgName[len(imgName) - 1], saturation, hue, valueHsv, saturationHsi, hueHsi, intensity, lLab, aLab, bLab
+    print(imgName[len(imgName) - 1])
+
+    return 0, imgName[len(imgName) - 1], saturation, hue, valueHsv, saturationHsi, hueHsi, intensity, lLab, aLab, bLab, r, g, b
 
 def listDir(arg):
     files = []
@@ -187,31 +211,34 @@ def listDir(arg):
 #função responsável por coletar os argumentos (nome dos aquivos de imagem) passados na chamada do programa 
 def main(argv):
 
+    counter = 0
+
     print('Processando imagens...')
 
     #print(argv[1])
 
-    files = listDir(argv[1])
+    files = listDir(argv[2])
 
     #print(files)
 
-    with open('DATASET.csv', mode='w', newline='') as csv_file:
+    with open(argv[1] + '.csv', mode='w', newline='') as csv_file:
     
-        fieldnames = ["imgName", "saturationHsv", "hueHsv", "valueHsv", "saturationHsi", "hueHsi", "intensityHsi", "lLab", "aLab", "bLab"]
+        fieldnames = ["imgName", "saturationHsv", "hueHsv", "valueHsv", "saturationHsi", "hueHsi", "intensityHsi", "lLab", "aLab", "bLab", "r", "g", "b"]
         writer = csv.DictWriter(csv_file, fieldnames=fieldnames, delimiter=';')
         writer.writeheader()
         
         for n in files:
-            cod, imgName, saturation, hue, valueHsv, saturationHsi, hueHsi, intensity, lLab, aLab, bLab = test(n)
+            cod, imgName, saturation, hue, valueHsv, saturationHsi, hueHsi, intensity, lLab, aLab, bLab, r, g, b = test(n)
             if cod < 0:
                 continue
             else:
+                counter = counter + 1
                 writer.writerow({"imgName": imgName, "saturationHsv": float(saturation), "hueHsv": float(hue), 
                 "valueHsv": float(valueHsv), "saturationHsi": float(saturationHsi), "hueHsi": float(hueHsi), "intensityHsi": float(intensity),
-                "lLab": lLab, "aLab": aLab, "bLab": bLab})
+                "lLab": lLab, "aLab": aLab, "bLab": bLab, "r": r, "g": g, "b": b})
         csv_file.close()
 
-    print('<<< Processado >>>')
+    print('<<< Processadas ' + str(counter) + ' imagens >>>')
 
     #pausando aplicação para manter as janelas dos gráficos abertas
     while True:
