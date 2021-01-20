@@ -228,14 +228,14 @@ def main(argv):
         writer.writeheader()
         
         for n in files:
-            cod, imgName, saturation, hue, valueHsv, saturationHsi, hueHsi, intensity, lLab, aLab, bLab, r, g, b = test(n)
+            cod, imgName, r, g, b, saturation, hue, valueHsv, saturationHsi, hueHsi, intensity, lLab, aLab, bLab = test(n)
             if cod < 0:
                 continue
             else:
                 counter = counter + 1
-                writer.writerow({"imgName": imgName, "saturationHsv": float(saturation), "hueHsv": float(hue), 
+                writer.writerow({"imgName": imgName, "r": r, "g": g, "b": b, "saturationHsv": float(saturation), "hueHsv": float(hue), 
                 "valueHsv": float(valueHsv), "saturationHsi": float(saturationHsi), "hueHsi": float(hueHsi), "intensityHsi": float(intensity),
-                "lLab": lLab, "aLab": aLab, "bLab": bLab, "r": r, "g": g, "b": b})
+                "lLab": lLab, "aLab": aLab, "bLab": bLab})
         csv_file.close()
 
     print('<<< Processadas ' + str(counter) + ' imagens >>>')
