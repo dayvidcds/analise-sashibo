@@ -197,7 +197,7 @@ def test(location):
 
     print(imgName[len(imgName) - 1])
 
-    return 0, imgName[len(imgName) - 1], saturation, hue, valueHsv, saturationHsi, hueHsi, intensity, lLab, aLab, bLab, r, g, b
+    return 0, imgName[len(imgName) - 1], r, g, b, saturation, hue, valueHsv, saturationHsi, hueHsi, intensity, lLab, aLab, bLab
 
 def listDir(arg):
     files = []
@@ -223,7 +223,7 @@ def main(argv):
 
     with open('DATASET.csv', mode='w', newline='') as csv_file:
     
-        fieldnames = ["imgName", "saturationHsv", "hueHsv", "valueHsv", "saturationHsi", "hueHsi", "intensityHsi", "lLab", "aLab", "bLab", "r", "g", "b"]
+        fieldnames = ["imgName", "r", "g", "b", "saturationHsv", "hueHsv", "valueHsv", "saturationHsi", "hueHsi", "intensityHsi", "lLab", "aLab", "bLab"]
         writer = csv.DictWriter(csv_file, fieldnames=fieldnames, delimiter=';')
         writer.writeheader()
         
