@@ -217,11 +217,11 @@ def main(argv):
 
     #print(argv[1])
 
-    files = listDir(argv[2])
+    files = listDir(argv[1])
 
     #print(files)
 
-    with open(argv[1] + '.csv', mode='w', newline='') as csv_file:
+    with open('DATASET.csv', mode='w', newline='') as csv_file:
     
         fieldnames = ["imgName", "saturationHsv", "hueHsv", "valueHsv", "saturationHsi", "hueHsi", "intensityHsi", "lLab", "aLab", "bLab", "r", "g", "b"]
         writer = csv.DictWriter(csv_file, fieldnames=fieldnames, delimiter=';')
