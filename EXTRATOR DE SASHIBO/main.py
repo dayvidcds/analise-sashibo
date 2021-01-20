@@ -62,13 +62,13 @@ def test(location):
     # ele se torna 0 e se for maior se torna 1. Isso ajuda no algoritmo de contornos.
     t, dst = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_TRIANGLE)
 
-    cv2.imshow('Binary Image', dst)
+    #cv2.imshow('Binary Image', dst)
 
     #contornando a área do sashibo
     contours, a = cv2.findContours(dst, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
     #pintando contornos na imagem para visualização
-    cv2.drawContours(src, contours, -1, (0, 0, 255), 1, cv2.LINE_AA)
+    #cv2.drawContours(src, contours, -1, (0, 0, 255), 1, cv2.LINE_AA)
 
     cv2.imshow('Contours', src)
 
@@ -81,7 +81,7 @@ def test(location):
     #Percorrendo todo contorno para extrair as informações da posição do sashibo
     for c in contours:
         area = cv2.contourArea(c)
-        if area > 1000 and area < 1000000:
+        if area > 10 and area < 1000000:
             #criando um retângulo na área encontrada e passando as informações de ponto e área para as variáveis
             (x, y, w, h) = cv2.boundingRect(c)
             #cv2.rectangle(src, (x, y), (x + w, y + h), (0, 255, 0), 2, cv2.LINE_AA)
@@ -92,7 +92,7 @@ def test(location):
             spl = spl[len(spl) - 1]
             print('<<< ERRO AO PROCESSAR IMAGEM >>> ' + spl)
             print('')"""
-            return
+            break
 
     #extraindo sashibo
     crop = src[y:y+h, x:x+w]
@@ -148,7 +148,9 @@ def test(location):
 
     #cv2.imshow('contornos', src)
 
-    cv2.imshow('ROI', crop)
+    hsv = cv2.cvtColor(crop, cv2.COLOR_BGR2HSV)
+
+    cv2.imshow('HSV', hsv)
 
     #print(hue)
     #print(saturation)
