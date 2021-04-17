@@ -5,7 +5,7 @@ from sklearn.cluster import KMeans #para usar o KMeans
 from sklearn.preprocessing import MinMaxScaler #para normalizar
 
 #carregando arquivo
-arq = pd.read_csv('../DATASETS/dataset2.csv', sep=';')  
+arq = pd.read_csv('../DATASETS/DATASET.csv', sep=';')  
 
 #criando array do arquivo csv
 dataset = np.array(arq)
