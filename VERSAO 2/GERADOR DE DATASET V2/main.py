@@ -201,7 +201,8 @@ def test(location):
                 if j > 150: #se o valor for maior que 170 ele faz a adição da informação do histograma no array
                     temp.append(j)
         #print(sorted(temp, reverse=True))
-        arrayMaximums.append(statistic.mode(temp)) #calculando a moda e inserindo valor no array
+        modeTemp = statistic.mode(temp)
+        arrayMaximums.append(modeTemp) #calculando a moda e inserindo valor no array
 
 
     #print(len(histr))
