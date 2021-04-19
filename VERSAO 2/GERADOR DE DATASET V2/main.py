@@ -71,10 +71,10 @@ def cropImage(src):
             #print(x,y,w,h)
             break
         else:
-            """spl = location.split('/')
-            spl = spl[len(spl) - 1]
+            spl = location.split('/')
+            #spl = spl[len(spl) - 1]
             print('<<< ERRO AO PROCESSAR IMAGEM >>> ' + spl)
-            print('')"""
+
             return -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 
     #extraindo sashibo
@@ -209,8 +209,6 @@ def test(location):
     #arrayMaximums é o array com a quantidade de pixels pra BGR que possuem as características BGR
 
     #print(arrayMaximums) # posicao 0 = B posicao 1 = G posicao 2 = R
-    print()
-    print()
 
     histR = arrayMaximums[2]
     histG = arrayMaximums[1]
@@ -304,7 +302,7 @@ def test(location):
 
     imgName = location.split('/')
 
-    print(imgName[len(imgName) - 1])
+    print('Processado: ' + imgName[len(imgName) - 1])
 
     return 0, imgName[len(imgName) - 1], histR, histG, histB, r, g, b, saturation, hue, valueHsv, saturationHsi, hueHsi, intensity, lLab, aLab, bLab
 
@@ -321,6 +319,7 @@ def listDir(arg):
 def main(argv):
 
     counter = 0
+    counterError = 0
 
     print('Processando imagens...')
 
@@ -339,7 +338,8 @@ def main(argv):
         for n in files:
             cod, imgName, histR, histG, histB, r, g, b, saturation, hue, valueHsv, saturationHsi, hueHsi, intensity, lLab, aLab, bLab = test(n)
             if cod < 0:
-                print('Erro ao processar imagem')
+                #print('Erro ao processar imagem')
+                counterError = counterError + 1
                 continue
             else:
                 counter = counter + 1
@@ -349,6 +349,7 @@ def main(argv):
         csv_file.close()
 
     print('<<< Processadas ' + str(counter) + ' imagens >>>')
+    print('<<< Qtd de falhas => ' + str(counterError) + ' imagens >>>')
 
     #pausando aplicação para manter as janelas dos gráficos abertas
     while True:
