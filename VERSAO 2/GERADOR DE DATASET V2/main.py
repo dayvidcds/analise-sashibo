@@ -72,7 +72,7 @@ def cropImage(src):
             break
         else:
             spl = location.split('/')
-            #spl = spl[len(spl) - 1]
+            spl = spl[len(spl) - 1]
             print('<<< ERRO AO PROCESSAR IMAGEM >>> ' + spl)
 
             return -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
@@ -194,6 +194,10 @@ def test(location):
 
     arrayMaximums = list()
 
+    histR = 120
+    histG = 155
+    histB = 162
+
     for c in histr:
         temp = list()
         for i in c:
@@ -201,19 +205,24 @@ def test(location):
                 if j > 150: #se o valor for maior que 170 ele faz a adição da informação do histograma no array
                     temp.append(j)
         #print(sorted(temp, reverse=True))
-        modeTemp = statistic.mode(temp)
-        arrayMaximums.append(modeTemp) #calculando a moda e inserindo valor no array
-
+        if len(temp) > 0:
+            modeTemp = statistic.mean(temp)
+            arrayMaximums.append(modeTemp) #calculando a moda e inserindo valor no array
+    
+    if len(arrayMaximums) == 3:
+        histR = arrayMaximums[2]
+        histG = arrayMaximums[1]
+        histB = arrayMaximums[0]
+    else:
+        spl = location.split('/')
+        spl = spl[len(spl) - 1]
+        print('<<< ERRO AO PROCESSAR IMAGEM >>> ' + spl)
 
     #print(len(histr))
 
     #arrayMaximums é o array com a quantidade de pixels pra BGR que possuem as características BGR
 
     #print(arrayMaximums) # posicao 0 = B posicao 1 = G posicao 2 = R
-
-    histR = arrayMaximums[2]
-    histG = arrayMaximums[1]
-    histB = arrayMaximums[0]
 
     plt.subplot(grid[1, :2])
     plt.title('HSV')
@@ -299,7 +308,7 @@ def test(location):
     plt.gcf().canvas.set_window_title(location)
 
     #exibindo graficos
-    plt.show(block=False)
+    #plt.show(block=False)
 
     imgName = location.split('/')
 
