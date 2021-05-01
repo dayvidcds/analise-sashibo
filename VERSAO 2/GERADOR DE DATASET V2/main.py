@@ -18,40 +18,16 @@ def test(location):
     #redimensionando a imagem para 600x400
     src = cv2.resize(src, (600, 400))
 
-    lab = cv2.cvtColor(src, cv2.COLOR_RGB2LAB)
+    lab = utils.getLAB(src)
 
     lLab = lab[:, :, 0].mean()
     aLab = lab[:, :, 1].mean()
     bLab = lab[:, :, 2].mean()
 
-    #valuesLab = [L, A, B]
-
     #alterando espaço de cores para HSV e jogando a nova imagem na variável hsv
     hsv = utils.getHSV(src)
 
-    #detectando a cor do sashibo por range de cor HSV (vermelho mais escuro até o vermelho mais claro)
-    #Obs: Foram realizados vários testes com ranges diferentes de vermelho para se chegar nesses valores abaixo
-
-    #definindo os valores HSV mínimo para detecção de cor
-    lower_range = np.array([160, 0, 0])
-    #definindo os valores HSV máximos para detecção de cor
-    upper_range = np.array([180, 255, 255])
-
-    #criando uma máscara na ára onde não for encontrada a cor que estiver no range definido acima
-    mask = cv2.inRange(hsv, lower_range, upper_range)
-
-    #imprimindo a máscara
-    #cv2.imshow('mask', mask)
-
-    #foi passado um filtro gausiano para suavizar as bordas da área do sashibo para minimizar as perdas
-    gray = cv2.GaussianBlur(mask, (7, 7), 3)
-
-    #aqui convertemos a imagem para bits, onde de o valor do pixel for menos que o limite
-    # ele se torna 0 e se for maior se torna 1. Isso ajuda no algoritmo de contornos.
-    t, dst = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_TRIANGLE)
-
-    #contornando a área do sashibo
-    contours, a = cv2.findContours(dst, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
+    contours = utils.getContours(hsv)
 
     #pintando contornos na imagem para visualização
     #cv2.drawContours(src, contours, -1, (0, 0, 255), 1, cv2.LINE_AA)
@@ -76,7 +52,7 @@ def test(location):
             spl = spl[len(spl) - 1]
             print('<<< ERRO AO PROCESSAR IMAGEM >>> ' + spl)
             print('')"""
-            return -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+            return -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 
     #extraindo sashibo
     crop = src[y:y+h, x:x+w]
@@ -116,22 +92,29 @@ def test(location):
 
     #CALCULANDO MODA DO RGB NO HISTOGRAMA
 
-    arrayMaximums = list()
+    arrayMaximums = list() #TODO: colocar esse algoritmo em utils
 
     histR = 120
     histG = 155
     histB = 162
 
+    median = 0
+
     for c in histr:
         temp = list()
         for i in c:
             for j in i:
-                if j > 150: #se o valor for maior que 170 ele faz a adição da informação do histograma no array
+                if j > 150: #se o valor for maior que 150 ele faz a adição da informação do histograma no array
                     temp.append(j)
+
         #print(sorted(temp, reverse=True))
+
+        #temp = quantidade de pixels que estão acima de 150 no canal R, G ou B. Abaixo calculamos a média para temp.
+
         if len(temp) > 0:
-            modeTemp = statistic.mean(temp)
+            modeTemp = statistic.mean(temp) #tirando a média dos valores encontrados que são acima de 150.
             arrayMaximums.append(modeTemp) #calculando a moda e inserindo valor no array
+            median = utils.median(temp)
     
     if len(arrayMaximums) == 3:
         histR = arrayMaximums[2]
@@ -238,7 +221,7 @@ def test(location):
 
     print('Processado: ' + imgName[len(imgName) - 1])
 
-    return 0, imgName[len(imgName) - 1], histR, histG, histB, r, g, b, saturation, hue, valueHsv, saturationHsi, hueHsi, intensity, lLab, aLab, bLab
+    return 0, imgName[len(imgName) - 1], median, histR, histG, histB, r, g, b, saturation, hue, valueHsv, saturationHsi, hueHsi, intensity, lLab, aLab, bLab
 
 def listDir(arg):
     files = []
@@ -265,19 +248,19 @@ def main(argv):
 
     with open('DATASET.csv', mode='w', newline='') as csv_file:
     
-        fieldnames = ["imgName", "histR", "histG", "histB", "r", "g", "b", "saturationHsv", "hueHsv", "valueHsv", "saturationHsi", "hueHsi", "intensityHsi", "lLab", "aLab", "bLab"]
+        fieldnames = ["imgName", "median", "histR", "histG", "histB", "r", "g", "b", "saturationHsv", "hueHsv", "valueHsv", "saturationHsi", "hueHsi", "intensityHsi", "lLab", "aLab", "bLab"]
         writer = csv.DictWriter(csv_file, fieldnames=fieldnames, delimiter=';')
         writer.writeheader()
         
         for n in files:
-            cod, imgName, histR, histG, histB, r, g, b, saturation, hue, valueHsv, saturationHsi, hueHsi, intensity, lLab, aLab, bLab = test(n)
+            cod, imgName, median, histR, histG, histB, r, g, b, saturation, hue, valueHsv, saturationHsi, hueHsi, intensity, lLab, aLab, bLab = test(n)
             if cod < 0:
                 #print('Erro ao processar imagem')
                 counterError = counterError + 1
                 continue
             else:
                 counter = counter + 1
-                writer.writerow({"imgName": imgName, "histR": histR, "histG": histG, "histB": histB, "r": r, "g": g, "b": b, "saturationHsv": float(saturation), "hueHsv": float(hue), 
+                writer.writerow({"imgName": imgName, "median": median, "histR": histR, "histG": histG, "histB": histB, "r": r, "g": g, "b": b, "saturationHsv": float(saturation), "hueHsv": float(hue), 
                 "valueHsv": float(valueHsv), "saturationHsi": float(saturationHsi), "hueHsi": float(hueHsi), "intensityHsi": float(intensity),
                 "lLab": lLab, "aLab": aLab, "bLab": bLab})
         csv_file.close()
