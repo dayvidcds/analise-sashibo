@@ -1,31 +1,12 @@
 import cv2
 import numpy as np
 import sys
+import os
 import argparse
+import convert
+import math
+import csv
 from matplotlib import pyplot as plt
-
-def lab(location):
-
-    #abrindo imagem
-    src = cv2.imread(location)
-    #redimensionando a imagem para 600x400
-    src = cv2.resize(src, (600, 400))
-
-    lab = cv2.cvtColor(src, cv2.COLOR_RGB2LAB)
-
-    #cv2.imshow('RGB', src)
-
-    #cv2.imshow('LAB', lab)
-
-    L = lab[:, :, 0].mean()
-    A = lab[:, :, 1].mean()
-    B = lab[:, :, 2].mean()
-
-    values = [L, A, B]
-
-    print(values)
-
-    return 0
 
 #função responsável por extrair as informações do sashibo
 def test(location):
@@ -34,21 +15,34 @@ def test(location):
     src = cv2.imread(location)
     #redimensionando a imagem para 600x400
     src = cv2.resize(src, (600, 400))
+
+    lab = cv2.cvtColor(src, cv2.COLOR_RGB2LAB)
+
+    lLab = lab[:, :, 0].mean()
+    aLab = lab[:, :, 1].mean()
+    bLab = lab[:, :, 2].mean()
+
+    #valuesLab = [L, A, B]
+
     #alterando espaço de cores para HSV e jogando a nova imagem na variável hsv
     hsv = cv2.cvtColor(src, cv2.COLOR_BGR2HSV)
-
-    #cv2.imshow('RGB', src)
 
     #detectando a cor do sashibo por range de cor HSV (vermelho mais escuro até o vermelho mais claro)
     #Obs: Foram realizados vários testes com ranges diferentes de vermelho para se chegar nesses valores abaixo
 
     #definindo os valores HSV mínimo para detecção de cor
-    lower_range = np.array([160, 0, 0])
+    RED_MIN = np.array([160, 0, 0])
     #definindo os valores HSV máximos para detecção de cor
-    upper_range = np.array([180, 255, 255])
+    RED_MAX = np.array([180, 255, 255])
+
+    ORANGE_MIN = np.array([5, 50, 50])
+    ORANGE_MAX = np.array([15, 255, 255])
+
+    COLOR_MIN = ORANGE_MIN
+    COLOR_MAX = ORANGE_MAX
 
     #criando uma máscara na ára onde não for encontrada a cor que estiver no range definido acima
-    mask = cv2.inRange(hsv, lower_range, upper_range)
+    mask = cv2.inRange(hsv, ORANGE_MIN, ORANGE_MAX)
 
     #imprimindo a máscara
     #cv2.imshow('mask', mask)
@@ -56,21 +50,15 @@ def test(location):
     #foi passado um filtro gausiano para suavizar as bordas da área do sashibo para minimizar as perdas
     gray = cv2.GaussianBlur(mask, (7, 7), 3)
 
-    #cv2.imshow('Gray / GaussianBlur', gray)
-
     #aqui convertemos a imagem para bits, onde de o valor do pixel for menos que o limite
     # ele se torna 0 e se for maior se torna 1. Isso ajuda no algoritmo de contornos.
     t, dst = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_TRIANGLE)
-
-    #cv2.imshow('Binary Image', dst)
 
     #contornando a área do sashibo
     contours, a = cv2.findContours(dst, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
     #pintando contornos na imagem para visualização
     #cv2.drawContours(src, contours, -1, (0, 0, 255), 1, cv2.LINE_AA)
-
-    cv2.imshow('Contours', src)
 
     #variáveis responsáveis por armazenar os valores da posição do sashibo na imagem original
     x = 0
@@ -81,7 +69,7 @@ def test(location):
     #Percorrendo todo contorno para extrair as informações da posição do sashibo
     for c in contours:
         area = cv2.contourArea(c)
-        if area > 10 and area < 1000000:
+        if area > 1000 and area < 1000000:
             #criando um retângulo na área encontrada e passando as informações de ponto e área para as variáveis
             (x, y, w, h) = cv2.boundingRect(c)
             #cv2.rectangle(src, (x, y), (x + w, y + h), (0, 255, 0), 2, cv2.LINE_AA)
@@ -92,12 +80,14 @@ def test(location):
             spl = spl[len(spl) - 1]
             print('<<< ERRO AO PROCESSAR IMAGEM >>> ' + spl)
             print('')"""
-            break
+            return -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 
     #extraindo sashibo
     crop = src[y:y+h, x:x+w]
 
     #abaixo só trabalhamos com a imagem que foi extraída (que é o sahsibo):
+
+    hsv_crop = cv2.cvtColor(crop, cv2.COLOR_BGR2HSV)
 
     #padrão usado pelo opencv, vamos usar nas plotagens dos gráficos abaixo
     color = ('b','g','r')
@@ -129,11 +119,21 @@ def test(location):
     x = np.arange(3)
 
     #capturando dados HSV da imagem separados
-    hue = crop[:, :, 0].mean()
-    saturation = crop[:, :, 1].mean()
-    value = crop[:, :, 2].mean()
+    hue = hsv_crop[:, :, 0].mean()
+    saturation = hsv_crop[:, :, 1].mean()
+    valueHsv = hsv_crop[:, :, 2].mean()
 
-    values = [saturation, hue, value]
+    #RGB
+
+    r = crop[:, :, 0].mean()
+    g = crop[:, :, 1].mean()
+    b = crop[:, :, 2].mean()
+
+    values_RGB = [r, g, b]
+
+    print(values_RGB)
+
+    values = [saturation, hue, valueHsv]
 
     plot = plt.bar(x, values)
 
@@ -146,38 +146,105 @@ def test(location):
     plt.xlabel("hsv separado")
     plt.ylabel("Valor") 
 
+    #convertendo RGB para HSI
+    hsi = convert.RGB_TO_HSI(crop)
+
+    """r = crop[:, :, 0].mean()
+    b = crop[:, :, 1].mean()
+    b = crop[:, :, 2].mean()
+
+    print('RGB')
+    print()
+    print(r)
+    print(g)
+    print(b)"""
+
+    #cv2.imshow('HSI Image', hsi)
+
+    #capturando dados HSI da imagem separados
+    hueHsi = hsi[:, :, 0].mean()
+    saturationHsi = hsi[:, :, 1].mean()
+    intensity = hsi[:, :, 2].mean()
+
+    if math.isnan(float(hueHsi)):
+        hueHsi = 0
+
+    values1 = [float(saturationHsi), float(hueHsi), float(intensity)]
+
+    #print(values1)
+
+    plt.subplot(grid[1, 2])
+    plt.title('HSI')
+
+    plt.xticks(x, ('Saturação', 'Matiz', 'Intensidade'))
+    plt.xlabel("hsi separado")
+    plt.ylabel("Valor") 
+
+    x = np.arange(3)
+    plot = plt.bar(x, values1)
+
+    for value in plot:
+        height = value.get_height()
+        plt.text(value.get_x() + value.get_width()/2., 1.002*height,'%f' % float(height), ha='center', va='bottom')
+
     #cv2.imshow('contornos', src)
 
-    hsv = cv2.cvtColor(crop, cv2.COLOR_BGR2HSV)
-
-    cv2.imshow('HSV', hsv)
+    cv2.imshow('crop', crop)
 
     #print(hue)
     #print(saturation)
 
-    #plt.show(block=False)
+    plt.gcf().canvas.set_window_title(location)
 
-    return 0
+    #exibindo graficos
+    plt.show(block=False)
+
+    imgName = location.split('/')
+
+    print(imgName[len(imgName) - 1])
+
+    return 0, imgName[len(imgName) - 1], r, g, b, saturation, hue, valueHsv, saturationHsi, hueHsi, intensity, lLab, aLab, bLab
+
+def listDir(arg):
+    files = []
+    for a, _, arq in os.walk(arg):
+        if len(arq) != 0:
+            for file in arq:
+                files.append(a + "/" + file)
+    return files
+    
 
 #função responsável por coletar os argumentos (nome dos aquivos de imagem) passados na chamada do programa 
-def main():
-    parser = argparse.ArgumentParser(description='Imagens a serem processadas')
-    
-    #aqui verifica se a flag -l foi passada
-    parser.add_argument('-l','--list', nargs='+', help='<Required> Set flag', required=True)
+def main(argv):
 
-    #pegando os nomes de arquivos passados e colocando na variável value
-    for _, value in parser.parse_args()._get_kwargs():
-        if value is not None:
-            break
+    counter = 0
 
     print('Processando imagens...')
 
-    #loop que roda a função test para cada arquivo de imagem
-    for n in value:
-        test(n)
+    print(argv[1])
 
-    print('<<< Processado >>>')
+    files = listDir(argv[1])
+
+    #print(files)
+
+    with open('DATASET.csv', mode='w', newline='') as csv_file:
+    
+        fieldnames = ["imgName", "r", "g", "b", "saturationHsv", "hueHsv", "valueHsv", "saturationHsi", "hueHsi", "intensityHsi", "lLab", "aLab", "bLab"]
+        writer = csv.DictWriter(csv_file, fieldnames=fieldnames, delimiter=';')
+        writer.writeheader()
+        
+        for n in files:
+            cod, imgName, r, g, b, saturation, hue, valueHsv, saturationHsi, hueHsi, intensity, lLab, aLab, bLab = test(n)
+            if cod < 0:
+                continue
+            else:
+                counter = counter + 1
+                writer.writerow({"imgName": imgName, "r": r, "g": g, "b": b, "saturationHsv": float(saturation), "hueHsv": float(hue), 
+                "valueHsv": float(valueHsv), "saturationHsi": float(saturationHsi), "hueHsi": float(hueHsi), "intensityHsi": float(intensity),
+                "lLab": lLab, "aLab": aLab, "bLab": bLab})
+        csv_file.close()
+
+    print('<<< Processadas ' + str(counter) + ' imagens >>>')
 
     #pausando aplicação para manter as janelas dos gráficos abertas
     while True:
@@ -187,6 +254,7 @@ def main():
             cv2.destroyAllWindows()
     return 0
 
+
 #chamada da função main
 if __name__ == '__main__':
-    sys.exit(main())
+    sys.exit(main(sys.argv))
