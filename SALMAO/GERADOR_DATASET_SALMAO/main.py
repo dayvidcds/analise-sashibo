@@ -45,20 +45,24 @@ def test(location):
     mask = cv2.inRange(hsv, ORANGE_MIN, ORANGE_MAX)
 
     #imprimindo a máscara
-    #cv2.imshow('mask', mask)
+    cv2.imshow('mask', mask)
 
     #foi passado um filtro gausiano para suavizar as bordas da área do sashibo para minimizar as perdas
     gray = cv2.GaussianBlur(mask, (7, 7), 3)
+
+    cv2.imshow('GaussianBlur', gray)
 
     #aqui convertemos a imagem para bits, onde de o valor do pixel for menos que o limite
     # ele se torna 0 e se for maior se torna 1. Isso ajuda no algoritmo de contornos.
     t, dst = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY | cv2.THRESH_TRIANGLE)
 
+    cv2.imshow('threshold', dst)
+
     #contornando a área do sashibo
     contours, a = cv2.findContours(dst, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
     #pintando contornos na imagem para visualização
-    #cv2.drawContours(src, contours, -1, (0, 0, 255), 1, cv2.LINE_AA)
+    cv2.drawContours(src, contours, -1, (0, 255, 0), 1, cv2.LINE_AA)
 
     #variáveis responsáveis por armazenar os valores da posição do sashibo na imagem original
     x = 0
@@ -82,6 +86,9 @@ def test(location):
             print('')"""
             return -1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 
+
+    cv2.imshow('Contornos', src)
+
     #extraindo sashibo
     crop = src[y:y+h, x:x+w]
 
@@ -101,7 +108,7 @@ def test(location):
     grid = plt.GridSpec(2, 3, wspace=0.4, hspace=0.3)
 
     plt.subplot(grid[0, 0])
-    plt.title('Sashibo')
+    plt.title('Salmão')
     plt.imshow(crop[:,:,::-1])
 
     plt.subplot(grid[0, 1:])
