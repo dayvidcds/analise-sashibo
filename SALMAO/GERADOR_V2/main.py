@@ -95,9 +95,9 @@ def test(location):
     arrayMaximums = list() #TODO: colocar esse algoritmo em utils
     arrayMedians = list()
 
-    histR = 120
-    histG = 155
-    histB = 162
+    histR = 75
+    histG = 200
+    histB = 220
 
     median = 0
 
